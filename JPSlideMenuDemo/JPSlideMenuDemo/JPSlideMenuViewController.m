@@ -9,6 +9,11 @@
 #import "JPSlideMenuViewController.h"
 #import "UIView+Extension.h"
 
+#define ShowDuration 0.8
+#define HideDuration 0.3
+#define ScaleValue 0.8
+#define AlphaValue 0.3
+
 @interface JPSlideMenuViewController ()
 @property(nonatomic,weak)UIViewController *rootViewController;
 @property(nonatomic,weak)UIViewController *leftMenuViewController;
@@ -21,7 +26,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self.view setBackgroundColor:[UIColor colorWithRed:0.103 green:0.651 blue:0.9495 alpha:1.0]];
+    self.view.backgroundColor=[UIColor colorWithRed:0.103 green:0.651 blue:0.9495 alpha:1.0];
     
     self.panGR=[[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(pan:)];
     [self.view addGestureRecognizer:self.panGR];
@@ -47,24 +52,54 @@
         if (self.panMovingLeft==NO && translation.x>0) {
             CGFloat percentage=translation.x / self.view.width;
             
-            self.rootViewController.view.transform=CGAffineTransformMakeScale(1-percentage*0.2, 1-percentage*0.2);
+            self.rootViewController.view.transform=
+                CGAffineTransformMakeScale(
+                                           1-percentage*(1-ScaleValue),
+                                           1-percentage*(1-ScaleValue)
+                                           );
             
-            self.rootViewController.view.frame=CGRectMake((3/4.0)*self.view.width*percentage, (self.view.height-self.view.height*(1-percentage*0.2))/2, self.view.width*(1-percentage*0.2), self.view.height*(1-percentage*0.2));
+            self.rootViewController.view.frame=
+                CGRectMake(
+                           (3/4.0)*self.view.width*percentage,
+                           (self.view.height-self.view.height*(1-percentage*(1-ScaleValue)))/2,
+                           self.view.width*(1-percentage*(1-ScaleValue)),
+                           self.view.height*(1-percentage*(1-ScaleValue))
+                           );
             
             
-            self.leftMenuViewController.view.alpha=0.3+percentage*0.7;
-            self.leftMenuViewController.view.transform=CGAffineTransformMakeScale(0.8+percentage*0.2, 0.8+percentage*0.2);
+            self.leftMenuViewController.view.alpha=AlphaValue+percentage*(1-AlphaValue);
+            
+            self.leftMenuViewController.view.transform=
+                CGAffineTransformMakeScale(
+                                           ScaleValue+percentage*(1-ScaleValue),
+                                           ScaleValue+percentage*(1-ScaleValue)
+                                           );
             
         }else if (self.panMovingLeft==YES && translation.x<0) {
             CGFloat percentage=-translation.x / self.view.width;
             
-            self.rootViewController.view.transform=CGAffineTransformMakeScale(0.8+percentage*0.2, 0.8+percentage*0.2);
+            self.rootViewController.view.transform=
+                CGAffineTransformMakeScale(
+                                           ScaleValue+percentage*(1-ScaleValue),
+                                           ScaleValue+percentage*(1-ScaleValue)
+                                           );
             
-            self.rootViewController.view.frame=CGRectMake((3/4.0)*self.view.width-(3/4.0)*self.view.width*percentage, (self.view.height-self.view.height*(0.8+percentage*0.2))/2, self.view.width*(0.8+percentage*0.2), self.view.height*(0.8+percentage*0.2));
+            self.rootViewController.view.frame=
+                CGRectMake(
+                           (3/4.0)*self.view.width-(3/4.0)*self.view.width*percentage,
+                           (self.view.height-self.view.height*(ScaleValue+percentage*(1-ScaleValue)))/2,
+                           self.view.width*(ScaleValue+percentage*(1-ScaleValue)),
+                           self.view.height*(ScaleValue+percentage*(1-ScaleValue))
+                           );
             
             
-            self.leftMenuViewController.view.alpha=1-percentage*0.7;
-            self.leftMenuViewController.view.transform=CGAffineTransformMakeScale(1-percentage*0.2, 1-percentage*0.2);
+            self.leftMenuViewController.view.alpha=1-percentage*(1-AlphaValue);
+            
+            self.leftMenuViewController.view.transform=
+                CGAffineTransformMakeScale(
+                                           1-percentage*(1-ScaleValue),
+                                           1-percentage*(1-ScaleValue)
+                                           );
         }
         
     }
@@ -96,8 +131,8 @@
     _rootViewController=rootViewController;
     _leftMenuViewController=leftMenuViewController;
     
-    _leftMenuViewController.view.alpha=0.3;
-    _leftMenuViewController.view.transform=CGAffineTransformMakeScale(0.8, 0.8);
+    _leftMenuViewController.view.alpha=AlphaValue;
+    _leftMenuViewController.view.transform=CGAffineTransformMakeScale(ScaleValue, ScaleValue);
     
     _rootViewController.view.layer.shadowOpacity=0.8f;
     _rootViewController.view.layer.shadowOffset=CGSizeZero;
@@ -112,24 +147,40 @@
 }
 
 -(void)showLeftMenu{
-    [UIView animateWithDuration:0.8 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-        self.rootViewController.view.transform=CGAffineTransformMakeScale(0.8, 0.8);
-        self.rootViewController.view.frame=CGRectMake((3/4.0)*self.view.width, (self.view.height-self.view.height*0.8)/2, self.view.width*0.8, self.view.height*0.8);
+    [UIView animateWithDuration:ShowDuration delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+        
+        self.rootViewController.view.transform=CGAffineTransformMakeScale(ScaleValue, ScaleValue);
+        
+        self.rootViewController.view.frame=
+            CGRectMake(
+                       (3/4.0)*self.view.width,
+                       (self.view.height-self.view.height*ScaleValue)/2,
+                       self.view.width*ScaleValue,
+                       self.view.height*ScaleValue
+                       );
+        
         self.leftMenuViewController.view.transform=CGAffineTransformMakeScale(1, 1);
         self.leftMenuViewController.view.alpha=1;
+        
     } completion:^(BOOL finished) {
+        
         [self.rootViewController.view addGestureRecognizer:self.tapGR];
+        
     }];
 }
 
 -(void)hideLeftMenu{
-    [UIView animateWithDuration:0.4 animations:^{
+    [UIView animateWithDuration:HideDuration animations:^{
+        
         self.rootViewController.view.transform=CGAffineTransformMakeScale(1, 1);
         self.rootViewController.view.frame=self.view.bounds;
-        self.leftMenuViewController.view.transform=CGAffineTransformMakeScale(0.8, 0.8);
-        self.leftMenuViewController.view.alpha=0.3;
+        self.leftMenuViewController.view.transform=CGAffineTransformMakeScale(ScaleValue, ScaleValue);
+        self.leftMenuViewController.view.alpha=AlphaValue;
+        
     }completion:^(BOOL finished) {
+        
         [self.rootViewController.view removeGestureRecognizer:self.tapGR];
+        
     }];
 }
 

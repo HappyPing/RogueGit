@@ -20,13 +20,12 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     JPSlideMenuViewController *svc=[[JPSlideMenuViewController alloc]init];
-    [
-     svc
-     addRootViewController:
-     [[UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]] instantiateViewControllerWithIdentifier:@"Master"]
-     andLeftMenuViewController:
-     [[LeftMenuViewController alloc] initWithNibName:@"LeftMenuViewController" bundle:nil]
-     ];
+    
+    UITabBarController *tbC=[[UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]] instantiateViewControllerWithIdentifier:@"Master"];
+    
+    LeftMenuViewController *leftVC=[[LeftMenuViewController alloc]initWithNibName:@"LeftMenuViewController" bundle:nil];
+    
+    [svc addRootViewController:tbC andLeftMenuViewController:leftVC];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor=[UIColor yellowColor];
