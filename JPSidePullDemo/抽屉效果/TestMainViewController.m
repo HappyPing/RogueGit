@@ -30,7 +30,7 @@
     //主视图展示A控制器的vie
     [self.mainView addSubview:navVC.view];
     
-    NSLog(@"%@",self.mainView.subviews);
+//    NSLog(@"%@",self.mainView.subviews);
     
 }
 

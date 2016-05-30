@@ -22,14 +22,14 @@
 #define Self_View_Width self.view.bounds.size.width
 #define Self_View_Height self.view.bounds.size.height
 
-#define MaxY 80
+#define MaxY 80 //左右挪的最后目标y值
 
-#define TargetRightScale 4/5.0
-#define TargetLeftScale 2/3.0
+#define TargetRightScale 4/5.0  //主视图右挪的最后宽度比例值
+#define TargetLeftScale 2/3.0   //主视图左挪的最后宽度比例值
 
 @interface JPSidePullViewController ()
-@property(nonatomic,assign)CGRect targetLeftRect;
-@property(nonatomic,assign)CGRect targetRightRect;
+@property(nonatomic,assign)CGRect targetLeftRect;   //往左挪的最后frame
+@property(nonatomic,assign)CGRect targetRightRect;  //往右挪的最后frame
 @end
 
 @implementation JPSidePullViewController
@@ -37,16 +37,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    CGRect targetRightRect=[self frameWithOriginaFrame:self.view.bounds offsetX:Self_View_Width*TargetRightScale isPan:NO];
-    self.targetRightRect=targetRightRect;
+    //配置视图
+    [self setupView];
     
-    CGRect targetLeftRect=[self frameWithOriginaFrame:self.view.bounds offsetX:Self_View_Width*TargetLeftScale isPan:NO];
-    targetLeftRect.origin.x=-Self_View_Width*TargetLeftScale;
-    self.targetLeftRect=targetLeftRect;
-    
-    [self setupChildView];
-    
-    //添加挪动手势
+    //在根视图上添加挪动手势
     UIPanGestureRecognizer *pan=[[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(pan:)];
     [self.view addGestureRecognizer:pan];
 
@@ -80,8 +74,9 @@
 //}
 
 
-//添加子视图
-- (void)setupChildView {
+//配置视图
+- (void)setupView {
+    
     //添加左视图
     UIView *leftView=[[UIView alloc] initWithFrame:self.view.bounds];
     leftView.backgroundColor=[UIColor colorWithRed:arc4random_uniform(255)/255.0 green:arc4random_uniform(255)/255.0 blue:arc4random_uniform(255)/255.0 alpha:1.0];
@@ -100,12 +95,22 @@
     [self.view addSubview:mainView];
     _mainView=mainView;
     
+    //根据目标偏移量计算往右挪的最后frame（显示左视图）
+    CGRect targetRightRect=[self frameWithOriginaFrame:self.view.bounds offsetX:Self_View_Width*TargetRightScale isPan:NO];
+    self.targetRightRect=targetRightRect;
+    
+    //根据目标偏移量计算往左挪的最后frame（显示右视图）
+    CGRect targetLeftRect=[self frameWithOriginaFrame:self.view.bounds offsetX:Self_View_Width*TargetLeftScale isPan:NO];
+    targetLeftRect.origin.x=-Self_View_Width*TargetLeftScale; //因为上面的计算方法会根据主视图的x值来执行反比例计算相应frame，所以这里的x值要单独拿出来设置，不然会是个正数值
+    self.targetLeftRect=targetLeftRect;
+    
+    //添加主视图底层阴影
     _mainView.layer.shadowOpacity=0.8f;
     _mainView.layer.shadowOffset=CGSizeZero;
     _mainView.layer.shadowRadius=4.0f;
     _mainView.layer.shadowPath=[UIBezierPath bezierPathWithRect:_mainView.bounds].CGPath;
     
-    //添加点击手势
+    //在主视图上添加点击手势
     UITapGestureRecognizer *tap=[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tap:)];
     [mainView addGestureRecognizer:tap];
 }
@@ -134,7 +139,7 @@
         self.rightView.hidden=NO;
     }
     
-    //复位
+    //复位（获取每次挪动的差值）
     [pan setTranslation:CGPointZero inView:self.view];
     
     //当手势结束时
@@ -171,7 +176,7 @@
     }
 }
 
-//点击手势
+//点击手势 ---> 还原
 -(void)tap:(UITapGestureRecognizer *)tap{
     [self recover];
 }
@@ -210,7 +215,7 @@
     }
 }
 
-
+//根据偏移量算出相应frame
 -(CGRect)frameWithOriginaFrame:(CGRect)frame offsetX:(CGFloat)offsetX isPan:(BOOL)isPan{
     
     CGFloat maxY=Self_View_Width*(MaxY/414.0);
